@@ -1,9 +1,10 @@
 from matplotlib.pyplot import imread
 import os
 import numpy as np
+from typing import List
 
 
-def imageDataStore(image_file_names, labels, batch_size):
+def imageDataStore(image_file_names: List[str], labels: List, batch_size: int):
     assert len(image_file_names) == len(labels)
     img_size, is_label_file = getDataFormatInfo(image_file_names, labels)
     n_images = len(image_file_names)

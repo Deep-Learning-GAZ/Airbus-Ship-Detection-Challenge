@@ -33,3 +33,7 @@ class ImageDataStoreTests(unittest.TestCase):
     @staticmethod
     def __joinFolder(folder, file_names_list):
         return [os.path.join(folder, file_name) for file_name in file_names_list]
+
+
+if __name__ == '__main__':
+    unittest.main()
