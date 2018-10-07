@@ -10,6 +10,12 @@ from Utilities import joinFolder
 
 def getABSDData(batch_size: int, folder: str = 'data')\
         -> Tuple[Generator[Tuple, None, None], Generator[Tuple, None, None], Generator[Tuple, None, None]]:
+    """
+    Creates 3 generators for train, dev and test sets.
+    :param batch_size: Batch size.
+    :param folder: Location of the .csv files.
+    :return: 3 generators for train, dev and test sets.
+    """
     training_dfl, dev_df, test_df = getABSDDataFrames(folder)
 
     def df2generator(df: pd.DataFrame) -> Generator[Tuple, None, None]:
@@ -21,6 +27,11 @@ def getABSDData(batch_size: int, folder: str = 'data')\
 
 
 def getABSDDataFrames(folder: str = 'data') -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """
+    Splits combines and splits the .csv files to train, dev and test sets.
+    :param folder: The location of the .csv files.
+    :return: DataFrames for train, dev and test sets.
+    """
     training_annotation_file = os.path.join(folder, "train_ship_segmentations.csv")
     test_annotation_file = os.path.join(folder, "test_ship_segmentations.csv")
     training_data, test_data = _fixPaths(folder, training_annotation_file, test_annotation_file)
