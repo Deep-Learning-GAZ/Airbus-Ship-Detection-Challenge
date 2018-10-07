@@ -3,3 +3,4 @@ from Utilities.modelToTable import modelToTable
 from Utilities.annotation2Mask import annotation2Mask
 from Utilities.ImageDataStore import imageDataStore
 from Utilities.areTablesMergeable import areTablesMergeable
+from Utilities.joinFolder import joinFolder

@@ -1,7 +1,7 @@
 import os
 import types
 import unittest
-from Utilities import imageDataStore
+from Utilities import imageDataStore, joinFolder
 import pandas as pd
 import numpy as np
 
@@ -13,7 +13,7 @@ class ImageDataStoreTests(unittest.TestCase):
         TRAIN_SUBFOLDER = os.path.join(DATASET_FOLDER, "train")
         TRAINING_ANNOTATION_FILE = os.path.join(DATASET_FOLDER, r"train_ship_segmentations.csv")
         training_data = pd.read_csv(TRAINING_ANNOTATION_FILE)
-        self.fileNames = self.__joinFolder(TRAIN_SUBFOLDER, training_data.ImageId.tolist())
+        self.fileNames = joinFolder(TRAIN_SUBFOLDER, training_data.ImageId.tolist())
         self.encodedPixels = training_data.EncodedPixels.tolist()
 
     def testType(self):
@@ -21,7 +21,7 @@ class ImageDataStoreTests(unittest.TestCase):
         self.assertIsInstance(ds, types.GeneratorType)
 
     def testBatchSize(self):
-        batch_sizes = [16, 9]
+        batch_sizes = [4, 16, 9]
         for batch_size in batch_sizes:
             ds = imageDataStore(self.fileNames, self.encodedPixels, batch_size)
             images, labels = next(ds)

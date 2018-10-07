@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib.pyplot import imread
 
 
-def imageDataStore(image_file_names: List[str], labels: List, batch_size: int) -> Generator[Tuple]:
+def imageDataStore(image_file_names: List[str], labels: List, batch_size: int) -> Generator[Tuple, None, None]:
     """
     Returns a generator, that iterates through the list of image file names, loads the image from the hard drive and
     returns a batch of it, along with the labels. If the labels are file names, thous are loaded as well.

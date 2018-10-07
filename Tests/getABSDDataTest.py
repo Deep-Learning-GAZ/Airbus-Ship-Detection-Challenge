@@ -1,4 +1,6 @@
 import unittest
+from matplotlib.pyplot import imread
+
 from getABSDData import getABSDDataFrames
 
 
@@ -13,6 +15,7 @@ class GetABSDDataTest(unittest.TestCase):
         self.assertTrue(len(train_image_names & dev_image_names) == 0)
         self.assertTrue(len(dev_image_names & test_image_names) == 0)
         self.assertTrue(len(train_image_names & test_image_names) == 0)
+        imread(train.ImageId.iloc[0])
 
 
 if __name__ == '__main__':
