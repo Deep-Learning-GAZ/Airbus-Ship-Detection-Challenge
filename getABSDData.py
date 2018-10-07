@@ -1,9 +1,24 @@
 import os
+from typing import Generator, Tuple
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
+from Utilities import imageDataStore
 
-def getABSDData(folder='data'):
+
+def getABSDData(batch_size: int, folder: str = 'data') -> Tuple[Generator[Tuple], Generator[Tuple], Generator[Tuple]]:
+    training_dfl, dev_df, test_df = getABSDDataFrames(folder)
+
+    def df2generator(df: pd.DataFrame):
+        image_file_names = df.ImageId.tolist()
+        labels = df.EncodedPixels.tolist()
+        return imageDataStore(image_file_names, labels, batch_size)
+
+    return df2generator(training_dfl), df2generator(dev_df), df2generator(test_df)
+
+
+def getABSDDataFrames(folder: str = 'data') -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     training_annotation_file = os.path.join(folder, "train_ship_segmentations.csv")
     test_annotation_file = os.path.join(folder, "test_ship_segmentations.csv")
     training_data = pd.read_csv(training_annotation_file)
@@ -19,6 +34,3 @@ def getABSDData(folder='data'):
     __selectImageFromData = lambda image_names_to_select: data[data[image_id_cn].isin(image_names_to_select)]
     return __selectImageFromData(train_image_names), __selectImageFromData(dev_image_names), __selectImageFromData(
         test_image_names)
-
-if __name__ == '__main__':
-    getABSDData()

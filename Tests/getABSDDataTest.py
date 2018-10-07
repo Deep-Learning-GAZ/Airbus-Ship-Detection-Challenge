@@ -1,10 +1,10 @@
 import unittest
-from getABSDData import getABSDData
+from getABSDData import getABSDDataFrames
 
 
 class GetABSDDataTest(unittest.TestCase):
     def test_something(self):
-        train, dev, test = getABSDData('../data')
+        train, dev, test = getABSDDataFrames('../data')
         self.assertTrue(len(train) > len(dev))
         self.assertTrue(len(dev) > len(test))
         train_image_names = set(train.ImageId)
