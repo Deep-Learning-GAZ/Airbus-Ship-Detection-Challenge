@@ -1,11 +1,13 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+*.pytest_cache/
 *.py[cod]
 *$py.class
 
 # IDE stuff
 .ipynb_checkpoints/
 .vscode/
+.idea/
 
 # Data
 *.zip

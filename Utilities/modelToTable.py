@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+
+
 def modelToTable(model):
     layer_names = [layer.name for layer in model.layers]
     layer_input_shapes = [layer.input_shape[1:] for layer in model.layers]

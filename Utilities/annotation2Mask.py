@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def annotation2Mask(annotation, shape=(768, 768)):
     '''
     mask_rle: run-length as string formated (start length)
