@@ -8,7 +8,17 @@ from Model import TrainableModel
 from Utilities import ElapsedTime, mkdir
 
 
-def findOptimalBatchSize(model: TrainableModel, max_batch_size: int = 512, n_epoch: int = 3, save_excel: bool = True):
+def findOptimalBatchSize(model: TrainableModel, max_batch_size: int = 512, n_epoch: int = 3,
+                         save_excel: bool = True) -> int:
+    """
+    Calls the train function of model with different batch_size parameters and return the one with the fastest training
+    time.
+    :param model: model to train
+    :param max_batch_size: The greatest batch size to concern.
+    :param n_epoch: Number of epochs per test training.
+    :param save_excel: Save the results in an excel file in the reports folder of the local directory.
+    :return: Batch size with the fastest training time.
+    """
     current_batch_size = max_batch_size
     fastest_idx = None
     tested_current_batch_size_arr = []
@@ -45,6 +55,6 @@ def _save_results_to_excel(model: TrainableModel, runtime_arr: List[float], test
     df = pd.DataFrame({'BatchSize': tested_current_batch_size_arr, 'Runtime': runtime_arr})
     REPORTS_DIR = 'reports'
     mkdir(REPORTS_DIR)
-    file_name = '{}_{}.xlsx'.format(model.name, datetime.datetime.now().isoformat())
+    file_name = '{}_{}.xlsx'.format(model.name, datetime.datetime.now().isoformat().replace('.', '').replace(':', ''))
     file_name_ful = os.path.join(REPORTS_DIR, file_name)
-    df.to_excel(file_name_ful)
+    df.to_excel(file_name_ful, index=False)
