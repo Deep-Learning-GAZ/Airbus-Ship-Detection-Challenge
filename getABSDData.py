@@ -1,10 +1,10 @@
 import os
-from typing import Generator, Tuple, Callable
+from typing import Generator, Tuple, Callable, List
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from Utilities import imageDataStore
+from Utilities import imageDataStore, annotation2Mask
 from Utilities import joinFolder
 import numpy as np
 
@@ -25,6 +25,43 @@ def getABSDData(batch_size: int, label_converter: Callable[[str], np.ndarray] = 
         image_file_names = df.ImageId.tolist()
         labels = df.EncodedPixels.tolist()
         return imageDataStore(image_file_names, labels, batch_size, label_converter)
+
+    return df2generator(training_dfl), df2generator(dev_df), df2generator(test_df)
+
+
+def getABSDDataMask(batch_size: int, label_converter: Callable[[str], np.ndarray] = None, folder: str = 'data') \
+        -> Tuple[Generator[Tuple, None, None], Generator[Tuple, None, None], Generator[Tuple, None, None]]:
+    """
+    Creates 3 generators for train, dev and test sets. The label is converted to mask.
+    :param batch_size: Batch size.
+    :param label_converter: (Optional) Function. As input it gets the mask, generated from the label element and the
+    return value will be yielded by the generator. The return value should be a 1-D array, and have the same size for
+    every input.
+    :param folder: Location of the .csv files.
+    :return: 3 generators for train, dev and test sets.
+    """
+    training_dfl, dev_df, test_df = getABSDDataFrames(folder)
+
+    def createUnitedMask(mask_str_arr: List[List[str]]) -> np.ndarray:
+        assert (len(mask_str_arr) > 0)
+        united_mask = None
+        for mask_str in mask_str_arr:
+            mask = annotation2Mask(mask_str)
+            if united_mask is None:
+                united_mask = mask
+            else:
+                united_mask += mask
+        return united_mask
+
+    def df2generator(df: pd.DataFrame) -> Generator[Tuple, None, None]:
+        groupped_df = df.groupby('ImageId')['EncodedPixels'].apply(list).reset_index()
+        image_file_names = groupped_df.ImageId.tolist()
+        labels = groupped_df.EncodedPixels.tolist()
+        if label_converter is not None:
+            converter = lambda x: label_converter(createUnitedMask(x)).flatten()
+        else:
+            converter = lambda x: createUnitedMask(x).flatten()
+        return imageDataStore(image_file_names, labels, batch_size, converter)
 
     return df2generator(training_dfl), df2generator(dev_df), df2generator(test_df)
 
@@ -59,7 +96,7 @@ def _shuffleImageNames(data) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     return train_image_names, test_image_names, dev_image_names
 
 
-def _fixPaths(folder: str, training_annotation_file: str, test_annotation_file: str)\
+def _fixPaths(folder: str, training_annotation_file: str, test_annotation_file: str) \
         -> Tuple[pd.DataFrame, pd.DataFrame]:
     train_subfolder = os.path.join(folder, "train")
     test_subfolder = os.path.join(folder, "test")
@@ -68,4 +105,3 @@ def _fixPaths(folder: str, training_annotation_file: str, test_annotation_file: 
     training_data.ImageId = joinFolder(train_subfolder, training_data.ImageId.tolist())
     test_data.ImageId = joinFolder(test_subfolder, test_data.ImageId.tolist())
     return training_data, test_data
-

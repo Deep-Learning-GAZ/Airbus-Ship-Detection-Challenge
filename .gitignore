@@ -68,3 +68,5 @@ docs/_build/
 
 # PyBuilder
 target/
+Tests/HyperparameterOptimizationTest/.pytest_cache/v/cache/lastfailed
+Tests/HyperparameterOptimizationTest/.pytest_cache/v/cache/nodeids

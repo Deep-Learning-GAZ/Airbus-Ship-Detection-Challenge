@@ -3,8 +3,8 @@ import unittest
 import numpy as np
 from matplotlib.pyplot import imread
 
-from Utilities import annotation2Mask, mask2BoxParameters
-from getABSDData import getABSDData, getABSDDataFrames
+from Utilities import annotation2Mask
+from getABSDData import getABSDData, getABSDDataMask, getABSDDataFrames
 
 
 class GetABSDDataTest(unittest.TestCase):
@@ -20,37 +20,39 @@ class GetABSDDataTest(unittest.TestCase):
         self.assertTrue(len(train_image_names & test_image_names) == 0)
         imread(train.ImageId.iloc[0])
 
-    def testGetABSDData(self):
-        batch_size = 16
-        train, dev, test = getABSDData(batch_size, folder='../data')
-
-        def chechBatch(ds):
-            images, labels = next(ds)
-            self.assertIsInstance(images, np.ndarray)
-            self.assertIsInstance(labels, list)
-            self.assertEquals(images.shape[0], batch_size)
-            self.assertEquals(len(labels), batch_size)
-
-        chechBatch(train)
-        chechBatch(train)
-        chechBatch(dev)
-        chechBatch(dev)
-        chechBatch(test)
-        chechBatch(test)
-
     def testGetABSDDataConverter(self):
         batch_size = 16
-        converter = lambda x: np.array(mask2BoxParameters(annotation2Mask(x)))
+        converter = lambda x: annotation2Mask(x).flatten()
         train, dev, test = getABSDData(batch_size, converter, '../data')
 
         def chechBatch(ds):
-            n_oriented_box_parameter = 5
+            n_pixels = 768*768
             images, labels = next(ds)
             self.assertIsInstance(images, np.ndarray)
             self.assertIsInstance(labels, np.ndarray)
             self.assertEquals(images.shape[0], batch_size)
             self.assertEquals(labels.shape[0], batch_size)
-            self.assertEquals(labels.shape[1], n_oriented_box_parameter)
+            self.assertEquals(labels.shape[1], n_pixels)
+
+        chechBatch(train)
+        chechBatch(train)
+        chechBatch(dev)
+        chechBatch(dev)
+        chechBatch(test)
+        chechBatch(test)
+
+    def testGetABSDDataMask(self):
+        batch_size = 16
+        train, dev, test = getABSDDataMask(batch_size, folder='../data')
+
+        def chechBatch(ds):
+            mask_shape = 768* 768
+            images, labels = next(ds)
+            self.assertIsInstance(images, np.ndarray)
+            self.assertIsInstance(labels, np.ndarray)
+            self.assertEquals(images.shape[0], batch_size)
+            self.assertEquals(labels.shape[0], batch_size)
+            self.assertEquals(labels.shape[1], mask_shape)
 
         chechBatch(train)
         chechBatch(train)
