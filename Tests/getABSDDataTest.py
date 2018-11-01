@@ -69,7 +69,7 @@ class GetABSDDataTest(unittest.TestCase):
             Flatten(),
         ])
         model.compile('adam', 'mean_squared_error')
-        train, _, _ = getABSDDataMask(2)
+        train, _, _ = getABSDDataMask(2, folder='../data')
         model.fit_generator(train, steps_per_epoch=2)
 
 
