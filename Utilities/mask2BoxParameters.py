@@ -1,14 +1,16 @@
+from typing import Tuple
+
 import numpy as np
 import math
 
 
-def mask2BoxParameters(matrix):
+def mask2BoxParameters(matrix: np.ndarray) -> Tuple[float, float, float, float, float]:
     """
     Definition of this function:  this function will help to find the ship on a greyscale image.
     :param matrix: it's a 2D array that is a binary image, so there are only 0-1 in the matrix, 1 is where the ship is.
     :return:
-            centerX: the x coordinate of the center of the ship
-            centerY: the y coordinate of the center of the ship
+            center_x: the x coordinate of the center of the ship
+            center_y: the y coordinate of the center of the ship
             alpha: the orientation of the ship
             long_side: the length of the longer side of the ship
             short_side: the length of the shorter side of the ship
@@ -60,19 +62,19 @@ def mask2BoxParameters(matrix):
     if distanceUpAndRight < distanceDownAndRight:
         alpha = math.atan2((row_left - row_up),
                           (column_left - column_up)) - math.pi / 2  # maybe needs further development
-        centerX = (column_up + column_right) / 2 + distanceDownAndRight / 2 * math.cos(alpha)
-        centerY = (row_up + row_right) / 2 + distanceDownAndRight / 2 * math.sin(alpha)
+        center_x = (column_up + column_right) / 2 + distanceDownAndRight / 2 * math.cos(alpha)
+        center_y = (row_up + row_right) / 2 + distanceDownAndRight / 2 * math.sin(alpha)
         long_side = distanceDownAndRight
         short_side = distanceUpAndRight
         # print("Alpha:", alpha * 180 / math.pi)
-        # print("centerX, centerY", centerX, centerY)
+        # print("center_x, center_y", center_x, center_y)
     else:
         alpha = math.atan2((row_left - row_up), (column_left - column_up))  # maybe needs further development
-        centerX = (column_down + column_right) / 2 + distanceUpAndRight / 2 * math.cos(alpha)
-        centerY = (row_down + row_right) / 2 + distanceUpAndRight / 2 * math.sin(alpha)
+        center_x = (column_down + column_right) / 2 + distanceUpAndRight / 2 * math.cos(alpha)
+        center_y = (row_down + row_right) / 2 + distanceUpAndRight / 2 * math.sin(alpha)
         long_side = distanceUpAndRight
         short_side = distanceDownAndRight
         # print("Alpha:", alpha * 180 / math.pi)
-        # print("centerX, centerY", centerX, centerY)
+        # print("center_x, center_y", center_x, center_y)
 
-    return centerX, centerY, alpha, long_side, short_side
+    return center_x, center_y, alpha, long_side, short_side

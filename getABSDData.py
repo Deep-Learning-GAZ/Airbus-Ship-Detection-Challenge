@@ -1,18 +1,21 @@
 import os
-from typing import Generator, Tuple
+from typing import Generator, Tuple, Callable
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
 from Utilities import imageDataStore
 from Utilities import joinFolder
+import numpy as np
 
 
-def getABSDData(batch_size: int, folder: str = 'data')\
+def getABSDData(batch_size: int, label_converter: Callable[[str], np.ndarray] = None, folder: str = 'data') \
         -> Tuple[Generator[Tuple, None, None], Generator[Tuple, None, None], Generator[Tuple, None, None]]:
     """
     Creates 3 generators for train, dev and test sets.
     :param batch_size: Batch size.
+    :param label_converter: Function. As input it gets the individual label element and the return value will be
+    yielded by the generator. The return value should be a 1-D array, and have the same size for every input.
     :param folder: Location of the .csv files.
     :return: 3 generators for train, dev and test sets.
     """
@@ -21,7 +24,7 @@ def getABSDData(batch_size: int, folder: str = 'data')\
     def df2generator(df: pd.DataFrame) -> Generator[Tuple, None, None]:
         image_file_names = df.ImageId.tolist()
         labels = df.EncodedPixels.tolist()
-        return imageDataStore(image_file_names, labels, batch_size)
+        return imageDataStore(image_file_names, labels, batch_size, label_converter)
 
     return df2generator(training_dfl), df2generator(dev_df), df2generator(test_df)
 
