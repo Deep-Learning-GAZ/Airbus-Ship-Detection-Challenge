@@ -2,6 +2,8 @@ import unittest
 
 import numpy as np
 from matplotlib.pyplot import imread
+from keras.models import Sequential
+from keras.layers import Flatten, Conv2D
 
 from Utilities import annotation2Mask
 from getABSDData import getABSDData, getABSDDataMask, getABSDDataFrames
@@ -60,6 +62,15 @@ class GetABSDDataTest(unittest.TestCase):
         chechBatch(dev)
         chechBatch(test)
         chechBatch(test)
+
+    def testGetABSDDataMaskKeras(self):
+        model = Sequential([
+            Conv2D(1, 3, padding='same', input_shape=(768, 768, 3)),
+            Flatten(),
+        ])
+        model.compile('adam', 'mean_squared_error')
+        train, _, _ = getABSDDataMask(2)
+        model.fit_generator(train, steps_per_epoch=2)
 
 
 if __name__ == '__main__':
