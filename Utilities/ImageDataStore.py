@@ -27,7 +27,7 @@ def imageDataStore(image_file_names: List[str], labels: List, batch_size: int,
             end_of_batch = min(n_yielded_images + batch_size, len(image_file_names))
             current_batch_size = end_of_batch - n_yielded_images
             images = np.zeros((current_batch_size,) + img_size)
-            labels_binary = np.zeros((current_batch_size, label_size))
+            labels_binary = np.zeros((current_batch_size, ) + label_size)
             for image_id in range(n_yielded_images, end_of_batch):
                 image_id_batch = image_id - n_yielded_images
                 img = imread(image_file_names[image_id])
@@ -46,10 +46,12 @@ def _getDataFormatInfo(image_file_names: List[str], labels: List,
     img_size = test_img.shape
     if label_converter is not None:
         label_shape = label_converter(labels[0]).shape
-        assert(len(label_shape) == 1, "label_converter muss have 1-D return value!")
-        label_size = label_shape[0]
+#         assert(len(label_shape) == 1, "label_converter muss have 1-D return value!")
+#         label_size = label_shape[0]
+        label_size = label_shape
     else:
         label_shape = labels[0].shape
-        assert(len(label_shape) == 1, "If label_converter is not set, elements in labels muss be 1-D arrays!")
-        label_size = label_shape[0]
+#         assert(len(label_shape) == 1, "If label_converter is not set, elements in labels muss be 1-D arrays!")
+#         label_size = label_shape[0]
+        label_size = label_shape
     return img_size, label_size

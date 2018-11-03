@@ -8,6 +8,8 @@ from Utilities import imageDataStore, annotation2Mask
 from Utilities import joinFolder
 import numpy as np
 
+from keras.utils.np_utils import to_categorical
+
 
 def getABSDData(batch_size: int, label_converter: Callable[[str], np.ndarray] = None, folder: str = 'data') \
         -> Tuple[Generator[Tuple, None, None], Generator[Tuple, None, None], Generator[Tuple, None, None]]:
@@ -29,7 +31,7 @@ def getABSDData(batch_size: int, label_converter: Callable[[str], np.ndarray] = 
     return df2generator(training_dfl), df2generator(dev_df), df2generator(test_df)
 
 
-def getABSDDataMask(batch_size: int, label_converter: Callable[[str], np.ndarray] = None, folder: str = 'data') \
+def getABSDDataMask(batch_size: int, n_classes: int, label_converter: Callable[[str], np.ndarray] = None, folder: str = 'data') \
         -> Tuple[Generator[Tuple, None, None], Generator[Tuple, None, None], Generator[Tuple, None, None]]:
     """
     Creates 3 generators for train, dev and test sets. The label is converted to mask.
@@ -58,9 +60,9 @@ def getABSDDataMask(batch_size: int, label_converter: Callable[[str], np.ndarray
         image_file_names = groupped_df.ImageId.tolist()
         labels = groupped_df.EncodedPixels.tolist()
         if label_converter is not None:
-            converter = lambda x: label_converter(createUnitedMask(x)).flatten()
+            converter = lambda x: to_categorical(label_converter(createUnitedMask(x)), n_classes)
         else:
-            converter = lambda x: createUnitedMask(x).flatten()
+            converter = lambda x: to_categorical(createUnitedMask(x), n_classes)
         return imageDataStore(image_file_names, labels, batch_size, converter)
 
     return df2generator(training_dfl), df2generator(dev_df), df2generator(test_df)
