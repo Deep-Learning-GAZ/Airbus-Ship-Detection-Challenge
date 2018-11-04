@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 
 
@@ -8,6 +10,8 @@ def annotation2Mask(annotation, shape=(768, 768)):
     Returns numpy array, 1 - mask, 0 - background
 
     '''
+    if isinstance(annotation, float) and math.isnan(annotation):
+        return np.zeros(shape)
     s = annotation.split()
     starts, lengths = [np.asarray(x, dtype=int) for x in (s[0:][::2], s[1:][::2])]
     starts -= 1
