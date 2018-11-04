@@ -6,7 +6,8 @@ from matplotlib.pyplot import imread
 
 
 def imageDataStore(image_file_names: List[str], labels: List, batch_size: int,
-                   label_converter: Callable[[str], np.ndarray] = None) -> Generator[
+                   label_converter: Callable[[str], np.ndarray] = None,
+                   image_converter: Callable[[str], np.ndarray] = None) -> Generator[
     Tuple[np.ndarray, np.ndarray], None, None]:
     """
     Returns a generator, that iterates infinitely through the list of image file names, loads the image from the hard
@@ -20,7 +21,7 @@ def imageDataStore(image_file_names: List[str], labels: List, batch_size: int,
     """
     assert (len(image_file_names) == len(labels), "The length of image_file_names and labels muss be the same!")
 
-    img_size, label_size = _getDataFormatInfo(image_file_names, labels, label_converter)
+    img_size, label_size = _getDataFormatInfo(image_file_names, labels, label_converter, image_converter)
     n_images = len(image_file_names)
     while True:
         for n_yielded_images in range(0, n_images, batch_size):
@@ -31,6 +32,8 @@ def imageDataStore(image_file_names: List[str], labels: List, batch_size: int,
             for image_id in range(n_yielded_images, end_of_batch):
                 image_id_batch = image_id - n_yielded_images
                 img = imread(image_file_names[image_id])
+                if image_converter is not None:
+                    img = image_converter(img)
                 images[image_id_batch, :] = img
 
                 label = labels[image_id]
@@ -41,15 +44,16 @@ def imageDataStore(image_file_names: List[str], labels: List, batch_size: int,
 
 
 def _getDataFormatInfo(image_file_names: List[str], labels: List,
-                       label_converter: Callable[[str], np.ndarray] = None) -> Tuple[Tuple[int, int, int], int]:
-    test_img = imread(image_file_names[0])
+                       label_converter: Callable[[str], np.ndarray] = None,
+                       image_converter: Callable[[str], np.ndarray] = None) -> Tuple[Tuple[int, int, int], int]:
+    test_img = image_converter(imread(image_file_names[0]))
     img_size = test_img.shape
     if label_converter is not None:
         label_shape = label_converter(labels[0]).shape
-        assert(len(label_shape) == 1, "label_converter muss have 1-D return value!")
+        assert (len(label_shape) == 1, "label_converter muss have 1-D return value!")
         label_size = label_shape[0]
     else:
         label_shape = labels[0].shape
-        assert(len(label_shape) == 1, "If label_converter is not set, elements in labels muss be 1-D arrays!")
+        assert (len(label_shape) == 1, "If label_converter is not set, elements in labels muss be 1-D arrays!")
         label_size = label_shape[0]
     return img_size, label_size
