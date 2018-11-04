@@ -1,12 +1,12 @@
 import unittest
 
 import numpy as np
-from matplotlib.pyplot import imread
+from keras.layers import Conv2D, Flatten
 from keras.models import Sequential
-from keras.layers import Flatten, Conv2D
+from matplotlib.pyplot import imread
 
 from Utilities import annotation2Mask
-from getABSDData import getABSDData, getABSDDataMask, getABSDDataFrames
+from getABSDData import getABSDData, getABSDDataFrames, getABSDDataMask
 
 
 class GetABSDDataTest(unittest.TestCase):
@@ -28,7 +28,7 @@ class GetABSDDataTest(unittest.TestCase):
         train, dev, test = getABSDData(batch_size, converter, '../data')
 
         def chechBatch(ds):
-            n_pixels = 768*768
+            n_pixels = 768 * 768
             images, labels = next(ds)
             self.assertIsInstance(images, np.ndarray)
             self.assertIsInstance(labels, np.ndarray)
@@ -48,7 +48,7 @@ class GetABSDDataTest(unittest.TestCase):
         train, dev, test = getABSDDataMask(batch_size, folder='../data')
 
         def chechBatch(ds):
-            mask_shape = 768* 768
+            mask_shape = 768 * 768
             images, labels = next(ds)
             self.assertIsInstance(images, np.ndarray)
             self.assertIsInstance(labels, np.ndarray)
