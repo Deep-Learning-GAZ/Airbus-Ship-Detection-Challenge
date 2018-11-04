@@ -1,6 +1,6 @@
 from keras.models import Model
-from keras.layers import Input
-from keras.layers.core import Activation, Reshape
+from keras.layers import Input, Flatten
+from keras.layers.core import Activation
 from keras.layers.convolutional import Conv2D
 from keras.layers.normalization import BatchNormalization
 
@@ -125,6 +125,7 @@ def segnet(
     conv_25 = Activation("relu")(conv_25)
 
     conv_26 = Conv2D(n_labels, 1, padding="same")(conv_25) #Why valid padding here?
+    conv_26 = Flatten()(conv_26)
 #     conv_26 = BatchNormalization()(conv_26)
 #     conv_26 = Reshape(
 #             (input_shape[0]*input_shape[1], n_labels),
