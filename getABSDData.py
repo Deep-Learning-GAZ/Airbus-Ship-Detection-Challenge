@@ -29,7 +29,8 @@ def getABSDData(batch_size: int, label_converter: Callable[[str], np.ndarray] = 
     return df2generator(training_dfl), df2generator(dev_df), df2generator(test_df)
 
 
-def getABSDDataMask(batch_size: int, label_converter: Callable[[str], np.ndarray] = None, folder: str = 'data') \
+def getABSDDataMask(batch_size: int, label_converter: Callable[[np.ndarray], np.ndarray] = None, folder: str = 'data',
+                    image_converter: Callable[[np.ndarray], np.ndarray] = None) \
         -> Tuple[Generator[Tuple, None, None], Generator[Tuple, None, None], Generator[Tuple, None, None]]:
     """
     Creates 3 generators for train, dev and test sets. The label is converted to mask.
@@ -61,7 +62,7 @@ def getABSDDataMask(batch_size: int, label_converter: Callable[[str], np.ndarray
             converter = lambda x: label_converter(createUnitedMask(x)).flatten()
         else:
             converter = lambda x: createUnitedMask(x).flatten()
-        return imageDataStore(image_file_names, labels, batch_size, converter)
+        return imageDataStore(image_file_names, labels, batch_size, converter, image_converter)
 
     return df2generator(training_dfl), df2generator(dev_df), df2generator(test_df)
 
