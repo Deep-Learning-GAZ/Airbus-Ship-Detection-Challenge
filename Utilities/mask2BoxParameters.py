@@ -62,19 +62,13 @@ def mask2BoxParameters(matrix: np.ndarray) -> Tuple[float, float, float, float, 
     if distanceUpAndRight < distanceDownAndRight:
         alpha = math.atan2((row_left - row_up),
                           (column_left - column_up)) - math.pi / 2  # maybe needs further development
-        center_x = (column_up + column_right) / 2 + distanceDownAndRight / 2 * math.cos(alpha)
-        center_y = (row_up + row_right) / 2 + distanceDownAndRight / 2 * math.sin(alpha)
         long_side = distanceDownAndRight
         short_side = distanceUpAndRight
-        # print("Alpha:", alpha * 180 / math.pi)
-        # print("center_x, center_y", center_x, center_y)
     else:
         alpha = math.atan2((row_left - row_up), (column_left - column_up))  # maybe needs further development
-        center_x = (column_down + column_right) / 2 + distanceUpAndRight / 2 * math.cos(alpha)
-        center_y = (row_down + row_right) / 2 + distanceUpAndRight / 2 * math.sin(alpha)
         long_side = distanceUpAndRight
         short_side = distanceDownAndRight
-        # print("Alpha:", alpha * 180 / math.pi)
-        # print("center_x, center_y", center_x, center_y)
+    center_x = (column_left + column_right) / 2
+    center_y = (row_left + row_right) / 2
 
     return center_x, center_y, alpha, long_side, short_side
