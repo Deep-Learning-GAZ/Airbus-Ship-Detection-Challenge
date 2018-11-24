@@ -1,1 +1,2 @@
 from Model.TrainableModel import TrainableModel
+from Model.RetrainedClassificationModel import RetrainedClassificationModel
