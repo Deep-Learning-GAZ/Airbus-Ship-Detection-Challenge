@@ -10,7 +10,7 @@ import numpy as np
 
 
 def getABSDData(batch_size: int, label_converter: Callable[[str], np.ndarray] = None, folder: str = 'data') \
-        -> Tuple[Generator[Tuple, None, None], Generator[Tuple, None, None], Generator[Tuple, None, None]]:
+        -> Tuple[imageDataStore, imageDataStore, imageDataStore]:
     """
     Creates 3 generators for train, dev and test sets.
     :param batch_size: Batch size.
@@ -21,7 +21,7 @@ def getABSDData(batch_size: int, label_converter: Callable[[str], np.ndarray] = 
     """
     training_dfl, dev_df, test_df = getABSDDataFrames(folder)
 
-    def df2generator(df: pd.DataFrame) -> Generator[Tuple, None, None]:
+    def df2generator(df: pd.DataFrame) -> imageDataStore:
         image_file_names = df.ImageId.tolist()
         labels = df.EncodedPixels.tolist()
         return imageDataStore(image_file_names, labels, batch_size, label_converter)
@@ -31,7 +31,7 @@ def getABSDData(batch_size: int, label_converter: Callable[[str], np.ndarray] = 
 
 def getABSDDataMask(batch_size: int, label_converter: Callable[[np.ndarray], np.ndarray] = None, folder: str = 'data',
                     image_converter: Callable[[np.ndarray], np.ndarray] = None) \
-        -> Tuple[Generator[Tuple, None, None], Generator[Tuple, None, None], Generator[Tuple, None, None]]:
+        -> Tuple[imageDataStore, imageDataStore, imageDataStore]:
     """
     Creates 3 generators for train, dev and test sets. The label is converted to mask.
     :param batch_size: Batch size.
@@ -54,7 +54,7 @@ def getABSDDataMask(batch_size: int, label_converter: Callable[[np.ndarray], np.
                 united_mask += mask
         return united_mask
 
-    def df2generator(df: pd.DataFrame) -> Generator[Tuple, None, None]:
+    def df2generator(df: pd.DataFrame) -> imageDataStore:
         groupped_df = df.groupby('ImageId')['EncodedPixels'].apply(list).reset_index()
         image_file_names = groupped_df.ImageId.tolist()
         labels = groupped_df.EncodedPixels.tolist()
