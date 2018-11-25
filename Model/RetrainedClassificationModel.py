@@ -32,11 +32,13 @@ class RetrainedClassificationModel(TrainableModel):
         # Creating the final model
         self.model = Model(input=model.input, output=predictions)
 
-    def train(self, batch_size: int, l2_regularization: float = 0, dropout_drop_porb: float = 0, n_epoch: int = 3):
+    def train(self, batch_size: int, l2_regularization: float = 0, dropout_drop_porb: float = 0, n_epoch: int = 3,
+              reduced_size=None, remove_nan=True):
         label_converter = lambda x: cv2.resize(x, (self.img_width, self.img_width))
         image_converter = lambda x: keras.applications.vgg16.preprocess_input(label_converter(x))
 
-        training, dev, _ = getABSDDataMask(1, label_converter=label_converter, image_converter=image_converter)
+        training, dev, _ = getABSDDataMask(batch_size, label_converter=label_converter, image_converter=image_converter,
+                                           reduced_size=reduced_size, remove_nan=remove_nan)
 
         callbacks = [EarlyStopping(patience=10), TensorBoard(), ModelCheckpoint('tcm.{epoch:02d}-{val_loss:.2f}.hdf5')]
         for layer in self.model.layers:

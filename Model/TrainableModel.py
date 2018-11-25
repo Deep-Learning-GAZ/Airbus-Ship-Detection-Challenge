@@ -10,7 +10,8 @@ class TrainableModel(ABC):
         pass
 
     @abstractmethod
-    def train(self, batch_size: int, l2_regularization: float = 0, dropout_drop_porb: float = 0, n_epoch: int = 3):
+    def train(self, batch_size: int, l2_regularization: float = 0, dropout_drop_porb: float = 0, n_epoch: int = 3,
+              reduced_size=None, remove_nan=True):
         """
         Trains a neural networks with the supplied parameters.
         :param n_epoch: Number of epochs to train.
