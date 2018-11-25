@@ -77,7 +77,7 @@ def getABSDDataFrames(folder: str = 'data') -> Tuple[pd.DataFrame, pd.DataFrame,
     test_annotation_file = os.path.join(folder, "test_ship_segmentations.csv")
     training_data, test_data = _fixPaths(folder, training_annotation_file, test_annotation_file)
 
-    data: pd.DataFrame = pd.concat([training_data, test_data])
+    data = pd.concat([training_data, test_data])
     train_image_names, test_image_names, dev_image_names = _shuffleImageNames(data)
 
     def selectImageFromData(image_names_to_select) -> pd.DataFrame:
