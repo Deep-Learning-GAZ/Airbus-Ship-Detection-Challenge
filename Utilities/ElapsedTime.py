@@ -9,15 +9,15 @@ class ElapsedTime:
         :param is_ms: If true the output is in milliseconds, seconds otherwise.
         :param verbose: If true displays runtime message on the console
         """
-        self.verbose: bool = verbose
-        self.is_ms: bool = is_ms
-        self.process_name: str = process_name
-        self.start: float = -1
-        self.end: float = -1
-        self.elapsed_time_ms: float = -1
+        self.verbose = verbose
+        self.is_ms = is_ms
+        self.process_name = process_name
+        self.start = -1
+        self.end = -1
+        self.elapsed_time_ms = -1
 
     def __enter__(self):
-        self.start: float = time.time()
+        self.start = time.time()
 
     def __exit__(self, ignored, ignored1, ignored2):
         self.end = time.time()
