@@ -1,2 +1,3 @@
 from Model.TrainableModel import TrainableModel
 from Model.RetrainedClassificationModel import RetrainedClassificationModel
+from Model.SegNetModel import SegNetModel

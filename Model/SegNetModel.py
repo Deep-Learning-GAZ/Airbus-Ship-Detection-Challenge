@@ -10,6 +10,7 @@ from model import segnet
 class SegNetModel(TrainableModel):
     def __init__(self, name):
         super().__init__(name)
+        self.reset()
 
     def reset(self):
         self.n_classes = 1
