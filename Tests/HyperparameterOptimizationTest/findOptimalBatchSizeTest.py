@@ -17,7 +17,7 @@ class _MockModel(TrainableModel):
         super().__init__('Mock')
         self.optimal_batch_size = optimal_batch_size
 
-    def train(self, batch_size: int, l2_regularization: float = 0, dropout_keep_porb: float = 0, n_epoch: int = 3):
+    def train(self, batch_size: int, l2_regularization: float = 0, dropout_drop_porb: float = 0, n_epoch: int = 3):
         wait_time_ms_fnc = lambda x: abs(x - self.optimal_batch_size) / 32
         ms2s = 1000
         time.sleep(wait_time_ms_fnc(batch_size) / ms2s)
