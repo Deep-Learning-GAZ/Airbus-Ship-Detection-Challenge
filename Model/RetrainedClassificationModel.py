@@ -2,8 +2,8 @@ import cv2
 
 import keras
 from keras import Model
-from keras.layers import Flatten, Dense, Dropout, Reshape, Conv2D
-from keras.callbacks import EarlyStopping, TensorBoard
+from keras.layers import Flatten, Dropout, Reshape, Conv2D
+from keras.callbacks import EarlyStopping, TensorBoard, ModelCheckpoint
 from keras.regularizers import l2
 
 from Model import TrainableModel
@@ -38,12 +38,14 @@ class RetrainedClassificationModel(TrainableModel):
 
         training, dev, _ = getABSDDataMask(1, label_converter=label_converter, image_converter=image_converter)
 
-        callbacks = [EarlyStopping(patience=10), TensorBoard()]
+        callbacks = [EarlyStopping(patience=10), TensorBoard(), ModelCheckpoint('tcm.{epoch:02d}-{val_loss:.2f}.hdf5')]
         for layer in self.model.layers:
             if hasattr(layer, 'kernel_regularizer'):
                 layer.kernel_regularizer = l2(l2_regularization)
             if isinstance(layer, Dropout):
                 layer.rate = dropout_drop_porb
-        self.model.compile(loss="mean_squared_error", optimizer='adam')
+        self.model.compile(loss="binary_crossentropy", optimizer='adam')
 
-        self.model.fit_generator(training, validation_data=dev, callbacks=callbacks, epochs=n_epoch, verbose=2)
+        hst = self.model.fit_generator(training, validation_data=dev, callbacks=callbacks, epochs=n_epoch)
+        self.model.save("tcm.hd5")
+        return hst
