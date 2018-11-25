@@ -2,7 +2,7 @@ import cv2
 
 import keras
 from keras import Model
-from keras.layers import Flatten, Dense, Dropout
+from keras.layers import Flatten, Dense, Dropout, Reshape, Conv2D
 from keras.callbacks import EarlyStopping, TensorBoard
 from keras.regularizers import l2
 
@@ -25,9 +25,8 @@ class RetrainedClassificationModel(TrainableModel):
 
         # Adding custom Layers
         x = model.layers[-1].output
-        x = Flatten()(x)
-        x = Dropout(0)(x)
-        predictions = Dense(self.img_width * self.img_height, activation="relu")(x)
+        x = Reshape((self.img_width, self.img_height, 2))(x)
+        predictions = Conv2D(1, 1, activation='sigmoid')(x)
 
         # Creating the final model
         self.model = Model(input=model.input, output=predictions)
