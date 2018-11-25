@@ -26,7 +26,8 @@ class RetrainedClassificationModel(TrainableModel):
         # Adding custom Layers
         x = model.layers[-1].output
         x = Reshape((self.img_width, self.img_height, 2))(x)
-        predictions = Conv2D(1, 1, activation='sigmoid')(x)
+        x = Conv2D(1, 1, activation='sigmoid')(x)
+        predictions = Flatten()(x)
 
         # Creating the final model
         self.model = Model(input=model.input, output=predictions)
