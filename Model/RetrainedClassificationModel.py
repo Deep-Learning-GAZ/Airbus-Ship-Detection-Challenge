@@ -34,7 +34,7 @@ class RetrainedClassificationModel(TrainableModel):
 
     def train(self, batch_size: int, l2_regularization: float = 0, dropout_drop_porb: float = 0, n_epoch: int = 3,
               reduced_size=None, remove_nan=True):
-        label_converter = lambda x: cv2.resize(x, (self.img_width, self.img_width))
+        label_converter = lambda x: cv2.resize(x, (self.img_width, self.img_height))
         image_converter = lambda x: keras.applications.vgg16.preprocess_input(label_converter(x))
 
         training, dev, _ = getABSDDataMask(batch_size, label_converter=label_converter, image_converter=image_converter,

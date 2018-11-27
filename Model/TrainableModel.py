@@ -21,3 +21,6 @@ class TrainableModel(ABC):
                (1 - dropout_keep_porb) probability.
         """
         pass
+
+    def load(self, weights_file_name):
+        self.model.load_weights(weights_file_name)
