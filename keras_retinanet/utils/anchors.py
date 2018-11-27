@@ -19,8 +19,6 @@ import keras
 from shapely.geometry import box
 from shapely.affinity import rotate, translate
 
-from ..utils.compute_overlap import compute_overlap
-
 
 class AnchorParameters:
     """ The parameteres that define how anchors are generated.
