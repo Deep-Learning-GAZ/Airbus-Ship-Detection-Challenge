@@ -14,6 +14,10 @@ __pycache__/
 *.jpg
 *.csv
 data/
+logs/
+reports/
+*.hd5
+*.hdf5
 
 # C extensions
 *.so
