@@ -10,7 +10,7 @@ from Utilities import annotation2Mask, annotation2area, imageDataStore, joinFold
 
 
 def getABSDData(batch_size: int, label_converter: Callable[[str], np.ndarray] = None, folder: str = 'data',
-                reduced_size=None, remove_nan=True, area_limit=math.inf) \
+                reduced_size=None, remove_nan=True, area_limit=0) \
         -> Tuple[imageDataStore, imageDataStore, imageDataStore]:
     """
     Creates 3 generators for train, dev and test sets.
@@ -32,7 +32,7 @@ def getABSDData(batch_size: int, label_converter: Callable[[str], np.ndarray] = 
 
 def getABSDDataMask(batch_size: int, label_converter: Callable[[np.ndarray], np.ndarray] = None, folder: str = 'data',
                     image_converter: Callable[[np.ndarray], np.ndarray] = None, reduced_size=None, remove_nan=True,
-                    area_limit=math.inf) \
+                    area_limit=0) \
         -> Tuple[imageDataStore, imageDataStore, imageDataStore]:
     """
     Creates 3 generators for train, dev and test sets. The label is converted to mask.
@@ -69,7 +69,7 @@ def getABSDDataMask(batch_size: int, label_converter: Callable[[np.ndarray], np.
     return df2generator(training_dfl), df2generator(dev_df), df2generator(test_df)
 
 
-def getABSDDataFrames(folder: str = 'data', reduced_size=None, remove_nan=True, area_limit=math.inf) -> Tuple[
+def getABSDDataFrames(folder: str = 'data', reduced_size=None, remove_nan=True, area_limit=0) -> Tuple[
     pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Splits combines and splits the .csv files to train, dev and test sets.
