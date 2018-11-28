@@ -20,7 +20,7 @@ class SegNetModel(TrainableModel):
     def train(self, batch_size: int, l2_regularization: float = 0, dropout_drop_porb: float = 0, n_epoch: int = 3,
               reduced_size=None, remove_nan=True):
         training, dev, _ = getABSDDataMask(batch_size=batch_size, reduced_size=reduced_size, remove_nan=remove_nan)
-        self.model.compile(loss="binary_crossentropy", optimizer="adam")
+        self.model.compile(loss="categorical_crossentropy", optimizer="adam")
 
         callbacks = [EarlyStopping(patience=10), TensorBoard(),
                      ModelCheckpoint('segnet.{epoch:02d}-{val_loss:.2f}.hdf5')]
