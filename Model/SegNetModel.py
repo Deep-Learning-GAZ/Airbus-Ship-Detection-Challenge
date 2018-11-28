@@ -1,5 +1,6 @@
-from keras.callbacks import TensorBoard, EarlyStopping, ModelCheckpoint
+from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
 from keras.layers import Dropout
+from keras.optimizers import SGD
 from keras.regularizers import l2
 
 from Model import TrainableModel
@@ -20,9 +21,10 @@ class SegNetModel(TrainableModel):
     def train(self, batch_size: int, l2_regularization: float = 0, dropout_drop_porb: float = 0, n_epoch: int = 3,
               reduced_size=None, remove_nan=True):
         training, dev, _ = getABSDDataMask(batch_size=batch_size, reduced_size=reduced_size, remove_nan=remove_nan)
-        self.model.compile(loss="categorical_crossentropy", optimizer="adam")
+        optimizer = SGD(lr=0.001, momentum=0.9, decay=0.0005, nesterov=False)
+        self.model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=['accuracy'])
 
-        callbacks = [EarlyStopping(patience=10), TensorBoard(),
+        callbacks = [EarlyStopping(patience=10), TensorBoard(write_images=True),
                      ModelCheckpoint('segnet.{epoch:02d}-{val_loss:.2f}.hdf5')]
         for layer in self.model.layers:
             if hasattr(layer, 'kernel_regularizer'):

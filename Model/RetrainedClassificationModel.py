@@ -40,13 +40,13 @@ class RetrainedClassificationModel(TrainableModel):
         training, dev, _ = getABSDDataMask(batch_size, label_converter=label_converter, image_converter=image_converter,
                                            reduced_size=reduced_size, remove_nan=remove_nan)
 
-        callbacks = [EarlyStopping(patience=10), TensorBoard(), ModelCheckpoint('tcm.{epoch:02d}-{val_loss:.2f}.hdf5')]
+        callbacks = [EarlyStopping(patience=10), TensorBoard(write_images=True), ModelCheckpoint('tcm.{epoch:02d}-{val_loss:.2f}.hdf5')]
         for layer in self.model.layers:
             if hasattr(layer, 'kernel_regularizer'):
                 layer.kernel_regularizer = l2(l2_regularization)
             if isinstance(layer, Dropout):
                 layer.rate = dropout_drop_porb
-        self.model.compile(loss="categorical_crossentropy", optimizer='adam')
+        self.model.compile(loss="categorical_crossentropy", optimizer='adam', metrics=['accuracy'])
 
         hst = self.model.fit_generator(training, validation_data=dev, callbacks=callbacks, epochs=n_epoch)
         self.model.save("tcm.hd5")
