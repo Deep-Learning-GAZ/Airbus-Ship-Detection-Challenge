@@ -1,16 +1,16 @@
+import math
 import os
-from typing import Generator, Tuple, Callable, List
+from typing import Callable, List, Tuple
 
+import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from Utilities import imageDataStore, annotation2Mask
-from Utilities import joinFolder
-import numpy as np
+from Utilities import annotation2Mask, annotation2area, imageDataStore, joinFolder
 
 
 def getABSDData(batch_size: int, label_converter: Callable[[str], np.ndarray] = None, folder: str = 'data',
-                reduced_size=None, remove_nan=True) \
+                reduced_size=None, remove_nan=True, area_limit=math.inf) \
         -> Tuple[imageDataStore, imageDataStore, imageDataStore]:
     """
     Creates 3 generators for train, dev and test sets.
@@ -20,7 +20,7 @@ def getABSDData(batch_size: int, label_converter: Callable[[str], np.ndarray] = 
     :param folder: Location of the .csv files.
     :return: 3 generators for train, dev and test sets.
     """
-    training_dfl, dev_df, test_df = getABSDDataFrames(folder, reduced_size, remove_nan)
+    training_dfl, dev_df, test_df = getABSDDataFrames(folder, reduced_size, remove_nan, area_limit)
 
     def df2generator(df: pd.DataFrame) -> imageDataStore:
         image_file_names = df.ImageId.tolist()
@@ -31,7 +31,8 @@ def getABSDData(batch_size: int, label_converter: Callable[[str], np.ndarray] = 
 
 
 def getABSDDataMask(batch_size: int, label_converter: Callable[[np.ndarray], np.ndarray] = None, folder: str = 'data',
-                    image_converter: Callable[[np.ndarray], np.ndarray] = None, reduced_size=None, remove_nan=True) \
+                    image_converter: Callable[[np.ndarray], np.ndarray] = None, reduced_size=None, remove_nan=True,
+                    area_limit=math.inf) \
         -> Tuple[imageDataStore, imageDataStore, imageDataStore]:
     """
     Creates 3 generators for train, dev and test sets. The label is converted to mask.
@@ -42,7 +43,7 @@ def getABSDDataMask(batch_size: int, label_converter: Callable[[np.ndarray], np.
     :param folder: Location of the .csv files.
     :return: 3 generators for train, dev and test sets.
     """
-    training_dfl, dev_df, test_df = getABSDDataFrames(folder, reduced_size, remove_nan)
+    training_dfl, dev_df, test_df = getABSDDataFrames(folder, reduced_size, remove_nan, area_limit)
 
     def createUnitedMask(mask_str_arr: List[List[str]]) -> np.ndarray:
         assert (len(mask_str_arr) > 0)
@@ -68,7 +69,7 @@ def getABSDDataMask(batch_size: int, label_converter: Callable[[np.ndarray], np.
     return df2generator(training_dfl), df2generator(dev_df), df2generator(test_df)
 
 
-def getABSDDataFrames(folder: str = 'data', reduced_size=None, remove_nan=True) -> Tuple[
+def getABSDDataFrames(folder: str = 'data', reduced_size=None, remove_nan=True, area_limit=math.inf) -> Tuple[
     pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Splits combines and splits the .csv files to train, dev and test sets.
@@ -82,6 +83,10 @@ def getABSDDataFrames(folder: str = 'data', reduced_size=None, remove_nan=True) 
     data = pd.concat([training_data, test_data])
     if remove_nan:
         data = data.dropna()
+
+    area_mask = [annotation2area(ann) > area_limit for ann in data.EncodedPixels]
+    data = data[area_mask]
+
     train_image_names, test_image_names, dev_image_names = _shuffleImageNames(data, reduced_size)
 
     def selectImageFromData(image_names_to_select) -> pd.DataFrame:

@@ -20,3 +20,10 @@ def annotation2Mask(annotation, shape=(768, 768)):
     for lo, hi in zip(starts, ends):
         img[lo:hi] = 1
     return img.reshape(shape).T  # Needed to align to RLE direction
+
+
+def annotation2area(annotation):
+    if isinstance(annotation, float) and math.isnan(annotation):
+        return 0
+    s = annotation.split()
+    return np.asarray(s[1:][::2], dtype=int).sum()
