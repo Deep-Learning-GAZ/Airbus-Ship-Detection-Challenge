@@ -46,7 +46,7 @@ class RetrainedClassificationModel(TrainableModel):
                 layer.kernel_regularizer = l2(l2_regularization)
             if isinstance(layer, Dropout):
                 layer.rate = dropout_drop_porb
-        self.model.compile(loss="binary_crossentropy", optimizer='adam')
+        self.model.compile(loss="categorical_crossentropy", optimizer='adam')
 
         hst = self.model.fit_generator(training, validation_data=dev, callbacks=callbacks, epochs=n_epoch)
         self.model.save("tcm.hd5")
