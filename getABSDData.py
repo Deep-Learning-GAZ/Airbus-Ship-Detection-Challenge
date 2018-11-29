@@ -84,10 +84,7 @@ def getABSDDataFrames(folder: str = 'data', reduced_size=None, remove_nan=True, 
     if remove_nan:
         data = data.dropna()
 
-    area_mask = [annotation2area(ann) > area_limit for ann in data.EncodedPixels]
-    data = data[area_mask]
-
-    train_image_names, test_image_names, dev_image_names = _shuffleImageNames(data, reduced_size)
+    train_image_names, test_image_names, dev_image_names = _shuffleImageNames(data, reduced_size, area_limit)
 
     def selectImageFromData(image_names_to_select) -> pd.DataFrame:
         return data[data.ImageId.isin(image_names_to_select)]
@@ -96,7 +93,11 @@ def getABSDDataFrames(folder: str = 'data', reduced_size=None, remove_nan=True, 
         test_image_names)
 
 
-def _shuffleImageNames(data, reduced_size) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def _shuffleImageNames(data, reduced_size, area_limit) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    data.Area = [annotation2area(ann) > area_limit for ann in data.EncodedPixels]
+    area_mask = data.groupby(['Area']).sum() > area_limit
+    data = data[area_mask]
+
     image_names = data.ImageId.unique()
     if reduced_size is not None:
         image_names = image_names[:reduced_size]
