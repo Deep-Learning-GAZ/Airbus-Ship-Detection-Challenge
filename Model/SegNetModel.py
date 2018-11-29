@@ -19,9 +19,8 @@ class SegNetModel(TrainableModel):
                             kernel=3, pool_size=(2, 2), output_mode="softmax")
 
     def train(self, batch_size: int, l2_regularization: float = 0, dropout_drop_porb: float = 0, n_epoch: int = 3,
-              reduced_size=None, remove_nan=True, area_limit=0):
-        training, dev, _ = getABSDDataMask(batch_size=batch_size, reduced_size=reduced_size, remove_nan=remove_nan,
-                                           area_limit=area_limit)
+              reduced_size=None, remove_nan=True):
+        training, dev, _ = getABSDDataMask(batch_size=batch_size, reduced_size=reduced_size, remove_nan=remove_nan)
         optimizer = SGD(lr=0.001, momentum=0.9, decay=0.0005, nesterov=False)
         self.model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=['accuracy'])
 
