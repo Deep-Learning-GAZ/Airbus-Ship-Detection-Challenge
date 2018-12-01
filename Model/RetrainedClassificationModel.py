@@ -41,8 +41,9 @@ class RetrainedClassificationModel(TrainableModel):
         training, dev, _ = getABSDDataMask(batch_size, label_converter=label_converter, image_converter=image_converter,
                                            reduced_size=reduced_size, remove_nan=remove_nan)
 
-        # EarlyStopping(patience=10), 
-        callbacks = [TensorBoard(write_images=True), ModelCheckpoint('tcm.{epoch:02d}-{val_loss:.2f}.hdf5')]
+        callbacks = [TensorBoard(write_images=True),
+                     ModelCheckpoint('tcm.{epoch:02d}.hdf5', monitor='val_f1', save_best_only=True, mode='max'), 
+                     EarlyStopping(monitor='val_f1', patience=10)]
         for layer in self.model.layers:
             if hasattr(layer, 'kernel_regularizer'):
                 layer.kernel_regularizer = l2(l2_regularization)
@@ -53,3 +54,11 @@ class RetrainedClassificationModel(TrainableModel):
         hst = self.model.fit_generator(training, validation_data=dev, callbacks=callbacks, epochs=n_epoch)
         self.model.save("tcm.hd5")
         return hst
+    
+    def eval(self, batch_size: int, reduced_size=None, remove_nan=True):
+        label_converter = lambda x: cv2.resize(x, (self.img_width, self.img_height))
+        image_converter = lambda x: keras.applications.vgg16.preprocess_input(label_converter(x))
+
+        training, dev, _ = getABSDDataMask(batch_size, label_converter=label_converter, image_converter=image_converter,
+                                           reduced_size=reduced_size, remove_nan=remove_nan)
+        return self.model.evaluate_generator(dev)
