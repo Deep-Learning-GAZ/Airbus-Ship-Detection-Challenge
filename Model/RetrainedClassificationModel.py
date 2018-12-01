@@ -8,6 +8,7 @@ from keras.regularizers import l2
 
 from Model import TrainableModel
 from getABSDData import getABSDDataMask
+from Utilities.Metrics import precision, recall, f1
 
 
 class RetrainedClassificationModel(TrainableModel):
@@ -47,7 +48,7 @@ class RetrainedClassificationModel(TrainableModel):
                 layer.kernel_regularizer = l2(l2_regularization)
             if isinstance(layer, Dropout):
                 layer.rate = dropout_drop_porb
-        self.model.compile(loss="binary_crossentropy", optimizer='adam', metrics=['accuracy'])
+        self.model.compile(loss="binary_crossentropy", optimizer='adam', metrics=[precision, recall, f1])
 
         hst = self.model.fit_generator(training, validation_data=dev, callbacks=callbacks, epochs=n_epoch)
         self.model.save("tcm.hd5")
