@@ -21,7 +21,8 @@ class SegNetModel(TrainableModel):
 
     def train(self, batch_size: int, l2_regularization: float = 0, dropout_drop_porb: float = 0, n_epoch: int = 3,
               reduced_size=None, remove_nan=True):
-        training, dev, _ = getABSDDataMask(batch_size=batch_size, reduced_size=reduced_size, remove_nan=remove_nan)
+        image_converter = lambda x: x/255
+        training, dev, _ = getABSDDataMask(batch_size=batch_size, image_converter=image_converter, reduced_size=reduced_size, remove_nan=remove_nan)
         optimizer = SGD(lr=0.001, momentum=0.9, decay=0.0005, nesterov=False)
         self.model.compile(loss="binary_crossentropy", optimizer=optimizer, metrics=[precision, recall, f1])
 
