@@ -5,6 +5,7 @@ from typing import Callable, List, Tuple
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from sklearn.utils import shuffle
 
 from Utilities import annotation2Mask, annotation2area, imageDataStore, joinFolder
 
@@ -94,16 +95,27 @@ def getABSDDataFrames(folder: str = 'data', reduced_size=None, remove_nan=True) 
 
 def _shuffleImageNames(data, reduced_size) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     data['Area'] = [annotation2area(ann) for ann in data.EncodedPixels]
-    data.sort_values(['Area'], ascending=False, inplace=True)
 
-    image_names = data.ImageId.unique()
+    # image_names = data.ImageId.unique()
+    data = data.groupby('ImageId')['Area'].sum()
+    data = shuffle(data, random_state=42)
+    n_image = len(data)
+    border_train = int(n_image * 0.7)
+    border_dev = int(n_image * 0.9)
+    train_image_names = data[:border_train]
+    dev_image_names = data[border_train:border_dev]
+    test_image_names = data[border_dev:]
+
     if reduced_size is not None:
-        image_names = image_names[:reduced_size]
-    train_dev_image_names, test_image_names, _, _ = train_test_split(image_names, range(0, len(image_names)),
-                                                                     test_size=0.1, random_state=42)
-    train_image_names, dev_image_names, _, _ = train_test_split(train_dev_image_names,
-                                                                range(0, len(train_dev_image_names)), test_size=0.22,
-                                                                random_state=42)
+        border_train = int(reduced_size * 0.7)
+        border_dev = int(reduced_size * 0.2)
+        border_test = reduced_size - border_train - border_dev
+        train_image_names.sort_values(ascending=False, inplace=True)
+        dev_image_names.sort_values(ascending=False, inplace=True)
+        test_image_names.sort_values(ascending=False, inplace=True)
+        train_image_names = train_image_names.index[:border_train].tolist()
+        dev_image_names = dev_image_names.index[:border_dev].tolist()
+        test_image_names = test_image_names.index[:border_test].tolist()
     return train_image_names, test_image_names, dev_image_names
 
 
