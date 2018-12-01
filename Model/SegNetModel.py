@@ -6,6 +6,7 @@ from keras.regularizers import l2
 from Model import TrainableModel
 from getABSDData import getABSDDataMask
 from model import segnet
+from Utilities.Metrics import precision, recall, f1
 
 
 class SegNetModel(TrainableModel):
@@ -22,7 +23,7 @@ class SegNetModel(TrainableModel):
               reduced_size=None, remove_nan=True):
         training, dev, _ = getABSDDataMask(batch_size=batch_size, reduced_size=reduced_size, remove_nan=remove_nan)
         optimizer = SGD(lr=0.001, momentum=0.9, decay=0.0005, nesterov=False)
-        self.model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=['accuracy'])
+        self.model.compile(loss="binary_crossentropy", optimizer=optimizer, metrics=[precision, recall, f1])
 
         callbacks = [EarlyStopping(patience=10), TensorBoard(write_images=True),
                      ModelCheckpoint('segnet.{epoch:02d}-{val_loss:.2f}.hdf5')]
@@ -34,6 +35,11 @@ class SegNetModel(TrainableModel):
 
         hst = self.model.fit_generator(training, validation_data=dev, callbacks=callbacks, epochs=n_epoch)
 
-        self.model.save("segnet.hd5")
+        self.model.save(self.name + ".hd5")
 
         return hst
+    
+    def eval(self, batch_size: int, reduced_size=None, remove_nan=True):
+        training, dev, _ = getABSDDataMask(batch_size=batch_size, reduced_size=reduced_size, remove_nan=remove_nan)
+        return self.model.evaluate_generator(dev)
+    
