@@ -116,6 +116,10 @@ def _shuffleImageNames(data, reduced_size) -> Tuple[pd.DataFrame, pd.DataFrame, 
         train_image_names = train_image_names.index[:border_train].tolist()
         dev_image_names = dev_image_names.index[:border_dev].tolist()
         test_image_names = test_image_names.index[:border_test].tolist()
+    else:
+        train_image_names = train_image_names.index.tolist()
+        dev_image_names = dev_image_names.index.tolist()
+        test_image_names = test_image_names.index.tolist()
     return train_image_names, test_image_names, dev_image_names
 
 
