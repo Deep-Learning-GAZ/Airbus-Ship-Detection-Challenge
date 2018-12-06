@@ -1,7 +1,9 @@
 from keras.models import Model
 from keras.layers import Input, Flatten
-from keras.layers.core import Activation
-from keras.layers.convolutional import Conv2D
+from keras.layers.core import Activation, Reshape
+from keras.layers.merge import Concatenate
+from keras.layers.pooling import MaxPooling2D
+from keras.layers.convolutional import Conv2D, UpSampling2D
 from keras.layers.normalization import BatchNormalization
 
 from layers import MaxPoolingWithArgmax2D, MaxUnpooling2D
@@ -12,10 +14,14 @@ def segnet(
         n_labels,
         kernel=3,
         pool_size=(2, 2),
-        output_mode="softmax"):
+        output_mode="softmax",
+        use_residual=True,
+        use_argmax=False):
     # encoder
     inputs = Input(shape=input_shape)
 
+    residual_connections = []
+    
     conv_1 = Conv2D(64, kernel, padding="same")(inputs)
     conv_1 = BatchNormalization()(conv_1)
     conv_1 = Activation("relu")(conv_1)
@@ -23,11 +29,9 @@ def segnet(
     conv_2 = BatchNormalization()(conv_2)
     conv_2 = Activation("relu")(conv_2)
 
-    # !!!!!!!!!!!!!!!!!!!!!!!!
-#     unpool_5 = conv_2 # Remove this line!!!
-    # !!!!!!!!!!!!!!!!!!!!!!!!
-
-    pool_1, mask_1 = MaxPoolingWithArgmax2D(pool_size)(conv_2)
+    if use_argmax: pool_1, mask_1 = MaxPoolingWithArgmax2D(pool_size)(conv_2)
+    else: pool_1 = MaxPooling2D(pool_size)(conv_2)
+    if use_residual: residual_connections.append(pool_1)
     
     conv_3 = Conv2D(128, kernel, padding="same")(pool_1)
     conv_3 = BatchNormalization()(conv_3)
@@ -36,7 +40,9 @@ def segnet(
     conv_4 = BatchNormalization()(conv_4)
     conv_4 = Activation("relu")(conv_4)
     
-    pool_2, mask_2 = MaxPoolingWithArgmax2D(pool_size)(conv_4)
+    if use_argmax: pool_2, mask_2 = MaxPoolingWithArgmax2D(pool_size)(conv_4)
+    else: pool_2 = MaxPooling2D(pool_size)(conv_4)
+    if use_residual: residual_connections.append(pool_2)
     
     conv_5 = Conv2D(256, kernel, padding="same")(pool_2)
     conv_5 = BatchNormalization()(conv_5)
@@ -48,7 +54,9 @@ def segnet(
     conv_7 = BatchNormalization()(conv_7)
     conv_7 = Activation("relu")(conv_7)
     
-    pool_3, mask_3 = MaxPoolingWithArgmax2D(pool_size)(conv_7)
+    if use_argmax: pool_3, mask_3 = MaxPoolingWithArgmax2D(pool_size)(conv_7)
+    else: pool_3 = MaxPooling2D(pool_size)(conv_7)
+    if use_residual: residual_connections.append(pool_3)
     
     conv_8 = Conv2D(512, kernel, padding="same")(pool_3)
     conv_8 = BatchNormalization()(conv_8)
@@ -60,7 +68,9 @@ def segnet(
     conv_10 = BatchNormalization()(conv_10)
     conv_10 = Activation("relu")(conv_10)
     
-    pool_4, mask_4 = MaxPoolingWithArgmax2D(pool_size)(conv_10)
+    if use_argmax: pool_4, mask_4 = MaxPoolingWithArgmax2D(pool_size)(conv_10)
+    else: pool_4 = MaxPooling2D(pool_size)(conv_10)
+    if use_residual: residual_connections.append(pool_4)
     
     conv_11 = Conv2D(512, kernel, padding="same")(pool_4)
     conv_11 = BatchNormalization()(conv_11)
@@ -72,12 +82,16 @@ def segnet(
     conv_13 = BatchNormalization()(conv_13)
     conv_13 = Activation("relu")(conv_13)
     
-    pool_5, mask_5 = MaxPoolingWithArgmax2D(pool_size)(conv_13)
+    if use_argmax: pool_5, mask_5 = MaxPoolingWithArgmax2D(pool_size)(conv_13)
+    else: pool_5 = MaxPooling2D(pool_size)(conv_13)
+    if use_residual: residual_connections.append(pool_5)
     print("Done building encoder..")
     
     # decoder
     
-    unpool_1 = MaxUnpooling2D(pool_size)([pool_5, mask_5])
+    pool_5 = Concatenate()([pool_5, residual_connections[-1]])
+    if use_argmax: unpool_1 = MaxUnpooling2D(pool_size)([pool_5, mask_5])
+    else: unpool_1 = UpSampling2D(pool_size)(pool_5)
     
     conv_14 = Conv2D(512, kernel, padding="same")(unpool_1)
     conv_14 = BatchNormalization()(conv_14)
@@ -89,7 +103,9 @@ def segnet(
     conv_16 = BatchNormalization()(conv_16)
     conv_16 = Activation("relu")(conv_16)
     
-    unpool_2 = MaxUnpooling2D(pool_size)([conv_16, mask_4])
+    conv_16 = Concatenate()([conv_16, residual_connections[-2]])
+    if use_argmax: unpool_2 = MaxUnpooling2D(pool_size)([conv_16, mask_4])
+    else: unpool_2 = UpSampling2D(pool_size)(conv_16)
     
     conv_17 = Conv2D(512, kernel, padding="same")(unpool_2)
     conv_17 = BatchNormalization()(conv_17)
@@ -101,7 +117,9 @@ def segnet(
     conv_19 = BatchNormalization()(conv_19)
     conv_19 = Activation("relu")(conv_19)
     
-    unpool_3 = MaxUnpooling2D(pool_size)([conv_19, mask_3])
+    conv_19 = Concatenate()([conv_19, residual_connections[-3]])
+    if use_argmax: unpool_3 = MaxUnpooling2D(pool_size)([conv_19, mask_3])
+    else: unpool_3 = UpSampling2D(pool_size)(conv_19)
     
     conv_20 = Conv2D(256, kernel, padding="same")(unpool_3)
     conv_20 = BatchNormalization()(conv_20)
@@ -113,7 +131,9 @@ def segnet(
     conv_22 = BatchNormalization()(conv_22)
     conv_22 = Activation("relu")(conv_22)
     
-    unpool_4 = MaxUnpooling2D(pool_size)([conv_22, mask_2])
+    conv_22 = Concatenate()([conv_22, residual_connections[-4]])
+    if use_argmax: unpool_4 = MaxUnpooling2D(pool_size)([conv_22, mask_2])
+    else: unpool_4 = UpSampling2D(pool_size)(conv_22)
     
     conv_23 = Conv2D(128, kernel, padding="same")(unpool_4)
     conv_23 = BatchNormalization()(conv_23)
@@ -122,18 +142,16 @@ def segnet(
     conv_24 = BatchNormalization()(conv_24)
     conv_24 = Activation("relu")(conv_24)
     
-    unpool_5 = MaxUnpooling2D(pool_size)([conv_24, mask_1])
-
+    conv_24 = Concatenate()([conv_24, residual_connections[-5]])
+    if use_argmax: unpool_5 = MaxUnpooling2D(pool_size)([conv_24, mask_1])
+    else: unpool_5 = UpSampling2D(pool_size)(conv_24)
+    
     conv_25 = Conv2D(64, kernel, padding="same")(unpool_5)
     conv_25 = BatchNormalization()(conv_25)
     conv_25 = Activation("relu")(conv_25)
 
-    conv_26 = Conv2D(n_labels, 1, padding="same")(conv_25) #Why valid padding here?
-    conv_26 = Flatten()(conv_26)
-#     conv_26 = BatchNormalization()(conv_26)
-#     conv_26 = Reshape(
-#             (input_shape[0]*input_shape[1], n_labels),
-#             input_shape=(input_shape[0], input_shape[1], n_labels))(conv_26)
+    conv_26 = Conv2D(n_labels, 1, padding="same")(conv_25) #Why valid padding here in the original?
+    conv_26 = BatchNormalization()(conv_26)
 
     outputs = Activation(output_mode)(conv_26)
     print("Done building decoder..")
