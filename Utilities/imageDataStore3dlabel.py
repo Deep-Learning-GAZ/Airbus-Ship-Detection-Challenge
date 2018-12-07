@@ -51,8 +51,7 @@ class imageDataStore3dlabel(Sequence):
         label = self.labels[image_id]
         if self.label_converter is not None:
             label = self.label_converter(label)
-        # One-hot encode labels
-        label = to_categorical(label)
+        label = to_categorical(label, num_classes=2)
         return label
 
     def _getImage(self, image_id):
