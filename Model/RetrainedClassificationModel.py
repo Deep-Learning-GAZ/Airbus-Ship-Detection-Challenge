@@ -27,7 +27,7 @@ class RetrainedClassificationModel(TrainableModel):
         # Adding custom Layers
         x = model.layers[-1].output
         x = Reshape((self.img_width, self.img_height, 2))(x)
-        x = Conv2D(1, 1, activation='sigmoid')(x)
+        x = Conv2D(1, 1 , activation='sigmoid')(x)
         predictions = Flatten()(x)
 
         # Creating the final model
@@ -42,14 +42,14 @@ class RetrainedClassificationModel(TrainableModel):
                                            reduced_size=reduced_size, remove_nan=remove_nan)
 
         callbacks = [TensorBoard(write_images=True),
-                     ModelCheckpoint('tcm.{epoch:02d}.hdf5', monitor='val_f1', save_best_only=True, mode='max'), 
-                     EarlyStopping(monitor='val_f1', patience=10)]
+                     ModelCheckpoint('tcm.{epoch:02d}.hdf5', monitor='val_f1', save_best_only=True, mode='max')
+                     ] # EarlyStopping(monitor='val_loss', patience=10)
         for layer in self.model.layers:
             if hasattr(layer, 'kernel_regularizer'):
                 layer.kernel_regularizer = l2(l2_regularization)
             if isinstance(layer, Dropout):
                 layer.rate = dropout_drop_porb
-        self.model.compile(loss="binary_crossentropy", optimizer='adam', metrics=[precision, recall, f1])
+        self.model.compile(loss="binary_crossentropy", optimizer='adagrad', metrics=[precision, recall, f1])
 
         hst = self.model.fit_generator(training, validation_data=dev, callbacks=callbacks, epochs=n_epoch)
         self.model.save("tcm.hd5")

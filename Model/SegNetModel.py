@@ -4,9 +4,9 @@ from keras.optimizers import SGD
 from keras.regularizers import l2
 
 from Model import TrainableModel
-from getABSDData import getABSDDataMask
+from getABSDData_3dlabel import getABSDDataMask
 from model import segnet
-from Utilities.Metrics import precision, recall, f1
+from Utilities.Metrics import precision, recall, f1, f2, iou, MetricsCallback, pred_area, true_area
 
 
 class SegNetModel(TrainableModel):
@@ -15,7 +15,7 @@ class SegNetModel(TrainableModel):
         self.reset()
 
     def reset(self):
-        self.n_classes = 1
+        self.n_classes = 2
         self.model = segnet(input_shape=(768, 768, 3), n_labels=self.n_classes,
                             kernel=3, pool_size=(2, 2), output_mode="softmax")
 
@@ -24,7 +24,7 @@ class SegNetModel(TrainableModel):
         image_converter = lambda x: x/255
         training, dev, _ = getABSDDataMask(batch_size=batch_size, image_converter=image_converter, reduced_size=reduced_size, remove_nan=remove_nan)
         optimizer = SGD(lr=0.001, momentum=0.9, decay=0.0005, nesterov=False)
-        self.model.compile(loss="binary_crossentropy", optimizer=optimizer, metrics=[precision, recall, f1])
+        self.model.compile(loss="binary_crossentropy", optimizer=optimizer, metrics=[precision, recall, f1, f2, iou, pred_area, true_area, "accuracy"])
 
         callbacks = [EarlyStopping(patience=10), TensorBoard(write_images=True),
                      ModelCheckpoint('segnet.{epoch:02d}-{val_loss:.2f}.hdf5')]

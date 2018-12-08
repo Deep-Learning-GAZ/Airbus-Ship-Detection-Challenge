@@ -15,7 +15,7 @@ def segnet(
         kernel=3,
         pool_size=(2, 2),
         output_mode="softmax",
-        use_residual=True,
+        use_residual=False,
         use_argmax=True):
     # encoder
     inputs = Input(shape=input_shape)
@@ -150,10 +150,12 @@ def segnet(
     conv_25 = BatchNormalization()(conv_25)
     conv_25 = Activation("relu")(conv_25)
 
-    conv_26 = Conv2D(n_labels, 1, padding="same")(conv_25)
+    conv_26 = Conv2D(n_labels, 1, padding="same")(conv_25) #Why valid padding here in the original?
     conv_26 = BatchNormalization()(conv_26)
+#     conv_26 = Reshape((input_shape[0]*input_shape[1], n_labels))(conv_26)
 
     outputs = Activation(output_mode)(conv_26)
+#     outputs = Flatten()(outputs)
     print("Done building decoder..")
 
     model = Model(inputs=inputs, outputs=outputs, name="SegNet")
