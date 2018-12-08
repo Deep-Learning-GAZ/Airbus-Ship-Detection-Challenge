@@ -10,14 +10,14 @@ from Utilities.Metrics import precision, recall, f1, f2, iou, MetricsCallback, p
 
 
 class SegNetModel(TrainableModel):
-    def __init__(self, name):
+    def __init__(self, name, use_residual=False, use_argmax=True):
         super().__init__(name)
-        self.reset()
+        self.reset(use_residual=False, use_argmax=True)
 
-    def reset(self):
+    def reset(self, use_residual=False, use_argmax=True):
         self.n_classes = 2
         self.model = segnet(input_shape=(768, 768, 3), n_labels=self.n_classes,
-                            kernel=3, pool_size=(2, 2), output_mode="softmax")
+                            kernel=3, pool_size=(2, 2), output_mode="softmax", use_residual=False, use_argmax=True)
 
     def train(self, batch_size: int, l2_regularization: float = 0, dropout_drop_porb: float = 0, n_epoch: int = 3,
               reduced_size=None, remove_nan=True):

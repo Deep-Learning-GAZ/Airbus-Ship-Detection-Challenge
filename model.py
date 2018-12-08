@@ -1,5 +1,5 @@
 from keras.models import Model
-from keras.layers import Input, Flatten
+from keras.layers import Input, Flatten, Add
 from keras.layers.core import Activation, Reshape
 from keras.layers.merge import Concatenate
 from keras.layers.pooling import MaxPooling2D
@@ -15,7 +15,7 @@ def segnet(
         kernel=3,
         pool_size=(2, 2),
         output_mode="softmax",
-        use_residual=True,
+        use_residual=False,
         use_argmax=True):
     # encoder
     inputs = Input(shape=input_shape)
@@ -89,7 +89,7 @@ def segnet(
     
     # decoder
     
-    if use_residual: pool_5 = Concatenate()([pool_5, residual_connections[-1]])
+    if use_residual: pool_5 = Add()([pool_5, residual_connections[-1]])
     if use_argmax: unpool_1 = MaxUnpooling2D(pool_size)([pool_5, mask_5])
     else: unpool_1 = UpSampling2D(pool_size)(pool_5)
     
@@ -103,7 +103,7 @@ def segnet(
     conv_16 = BatchNormalization()(conv_16)
     conv_16 = Activation("relu")(conv_16)
     
-    if use_residual: conv_16 = Concatenate()([conv_16, residual_connections[-2]])
+    if use_residual: conv_16 = Add()([conv_16, residual_connections[-2]])
     if use_argmax: unpool_2 = MaxUnpooling2D(pool_size)([conv_16, mask_4])
     else: unpool_2 = UpSampling2D(pool_size)(conv_16)
     
@@ -117,7 +117,7 @@ def segnet(
     conv_19 = BatchNormalization()(conv_19)
     conv_19 = Activation("relu")(conv_19)
     
-    if use_residual: conv_19 = Concatenate()([conv_19, residual_connections[-3]])
+    if use_residual: conv_19 = Add()([conv_19, residual_connections[-3]])
     if use_argmax: unpool_3 = MaxUnpooling2D(pool_size)([conv_19, mask_3])
     else: unpool_3 = UpSampling2D(pool_size)(conv_19)
     
@@ -131,7 +131,7 @@ def segnet(
     conv_22 = BatchNormalization()(conv_22)
     conv_22 = Activation("relu")(conv_22)
     
-    if use_residual: conv_22 = Concatenate()([conv_22, residual_connections[-4]])
+    if use_residual: conv_22 = Add()([conv_22, residual_connections[-4]])
     if use_argmax: unpool_4 = MaxUnpooling2D(pool_size)([conv_22, mask_2])
     else: unpool_4 = UpSampling2D(pool_size)(conv_22)
     
@@ -142,7 +142,7 @@ def segnet(
     conv_24 = BatchNormalization()(conv_24)
     conv_24 = Activation("relu")(conv_24)
     
-    if use_residual: conv_24 = Concatenate()([conv_24, residual_connections[-5]])
+    if use_residual: conv_24 = Add()([conv_24, residual_connections[-5]])
     if use_argmax: unpool_5 = MaxUnpooling2D(pool_size)([conv_24, mask_1])
     else: unpool_5 = UpSampling2D(pool_size)(conv_24)
     
