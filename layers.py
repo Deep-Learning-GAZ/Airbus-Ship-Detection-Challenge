@@ -3,7 +3,11 @@ from keras.layers import Layer
 
 
 class MaxPoolingWithArgmax2D(Layer):
-
+    """
+    MaxPooling Layer using TensorFlow's tf.nn.max_pool_with_argmax
+    to create pooling with argmax.
+    """
+    
     def __init__(
             self,
             pool_size=(2, 2),
@@ -44,11 +48,11 @@ class MaxPoolingWithArgmax2D(Layer):
         output_shape = tuple(output_shape)
         return [output_shape, output_shape]
 
-    # def compute_mask(self, inputs, mask=None):
-    #     return 2 * [None]
-
 
 class MaxUnpooling2D(Layer):
+    """
+    MaxUnpooling(Upsampling) Layer created for upsampling after MaxPooling with argmax.
+    """
     def __init__(self, size=(2, 2), **kwargs):
         super(MaxUnpooling2D, self).__init__(**kwargs)
         self.size = size
@@ -58,7 +62,7 @@ class MaxUnpooling2D(Layer):
         with K.tf.variable_scope(self.name):
             mask = K.cast(mask, 'int32')
             input_shape = K.tf.shape(updates, out_type='int32')
-            #  calculation new shape
+            #  calculation of new shape
             if output_shape is None:
                 output_shape = (
                         input_shape[0],
@@ -67,7 +71,7 @@ class MaxUnpooling2D(Layer):
                         input_shape[3])
             self.output_shape1 = output_shape
 
-            # calculation indices for batch, height, width and feature maps
+            # calculation of indices for batch, height, width and feature maps
             one_like_mask = K.ones_like(mask, dtype='int32')
             batch_shape = K.concatenate(
                     [[input_shape[0]], [1], [1], [1]],
