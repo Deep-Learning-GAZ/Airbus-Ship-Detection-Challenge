@@ -39,7 +39,7 @@ def getABSDDataMask(batch_size: int, label_converter: Callable[[np.ndarray], np.
     Creates 3 generators for train, dev and test sets. The label is converted to mask.
     :param batch_size: Batch size.
     :param label_converter: (Optional) Function. As input it gets the mask, generated from the label element and the
-    return value will be yielded by the generator. The return value should be a 1-D array, and have the same size for
+    return value will be yielded by the generator. The return value should be a 3-D array, and have the same size for
     every input.
     :param folder: Location of the .csv files.
     :return: 3 generators for train, dev and test sets.
