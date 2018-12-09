@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 import keras
 from keras import Model
@@ -27,7 +28,7 @@ class RetrainedClassificationModel(TrainableModel):
         # Adding custom Layers
         x = model.layers[-1].output
         x = Reshape((self.img_width, self.img_height, 2))(x)
-        x = Conv2D(1, 1 , activation='sigmoid')(x)
+        x = Conv2D(1, 1, activation='sigmoid')(x)
         predictions = Flatten()(x)
 
         # Creating the final model
@@ -36,14 +37,17 @@ class RetrainedClassificationModel(TrainableModel):
     def train(self, batch_size: int, l2_regularization: float = 0, dropout_drop_porb: float = 0, n_epoch: int = 3,
               reduced_size=None, remove_nan=True):
         label_converter = lambda x: cv2.resize(x, (self.img_width, self.img_height))
-        image_converter = lambda x: keras.applications.vgg16.preprocess_input(label_converter(x))
+        image_converter = self._input_converter
+        image_converter_eval = lambda x: keras.applications.vgg16.preprocess_input(label_converter(x))
 
-        training, dev, _ = getABSDDataMask(batch_size, label_converter=label_converter, image_converter=image_converter,
+        training, _, _ = getABSDDataMask(batch_size, label_converter=label_converter, image_converter=image_converter,
+                                           reduced_size=reduced_size, remove_nan=remove_nan)
+        _, dev, _ = getABSDDataMask(batch_size, label_converter=label_converter, image_converter=image_converter_eval,
                                            reduced_size=reduced_size, remove_nan=remove_nan)
 
         callbacks = [TensorBoard(write_images=True),
-                     ModelCheckpoint('tcm.{epoch:02d}.hdf5', monitor='val_f1', save_best_only=True, mode='max')
-                     ] # EarlyStopping(monitor='val_loss', patience=10)
+                     ModelCheckpoint('tcm.{epoch:02d}.hdf5', monitor='val_f1', save_best_only=True, mode='max'),
+                     EarlyStopping(monitor='val_loss', patience=10)]
         for layer in self.model.layers:
             if hasattr(layer, 'kernel_regularizer'):
                 layer.kernel_regularizer = l2(l2_regularization)
@@ -61,4 +65,10 @@ class RetrainedClassificationModel(TrainableModel):
 
         training, dev, _ = getABSDDataMask(batch_size, label_converter=label_converter, image_converter=image_converter,
                                            reduced_size=reduced_size, remove_nan=remove_nan)
-        return self.model.evaluate_generator(dev)
+        return self.model.evaluate_generator(dev, verbose=1)
+
+    def _input_converter(self, x):
+        resized = cv2.resize(x, (self.img_width, self.img_height))
+        noise = np.random.normal(0, 5, size=resized.shape)
+        img = np.clip(resized + noise, 0, 255)
+        return keras.applications.vgg16.preprocess_input(img)
