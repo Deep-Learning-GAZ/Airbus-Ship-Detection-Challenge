@@ -16,10 +16,10 @@ class imageDataStore3dlabel(Sequence):
         drive and returns a batch of it, along with the labels. If len(image_file_names) % batch_size != 0, then last batch
         in the epoch is shorten, than the batch size.
         :param image_file_names: List of image file names.
-        :param labels: List of same sized 1-D arrays, or some custom structure accepted by label_converter.
+        :param labels: List of same sized 3-D arrays, or some custom structure accepted by label_converter.
         :param batch_size: Number of value pairs to return per iteration. (The last iteration can be smaller.)
         :param label_converter: (Optional) Function. As input it gets the individual label element and the return value will
-        be yielded by the generator. The return value should be a 1-D array, and have the same size for every input.
+        be yielded by the generator. The return value should be a 3-D array, and have the same size for every input.
         """
         assert (len(image_file_names) == len(labels), "The length of image_file_names and labels muss be the same!")
 
@@ -51,6 +51,7 @@ class imageDataStore3dlabel(Sequence):
         label = self.labels[image_id]
         if self.label_converter is not None:
             label = self.label_converter(label)
+        #One-hot encoding needed for proper input for SegNet
         label = to_categorical(label, num_classes=2)
         return label
 
