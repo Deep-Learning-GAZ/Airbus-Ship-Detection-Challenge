@@ -4,7 +4,7 @@ from keras.optimizers import SGD
 from keras.regularizers import l2
 
 from Model import TrainableModel
-from getABSDData_3dlabel import getABSDDataMask
+from getABSDData import getABSDDataMask
 from model import segnet
 from Utilities.Metrics import precision, recall, f1, f2, iou, MetricsCallback, pred_area, true_area
 
